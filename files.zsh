@@ -114,6 +114,25 @@ function cd() {
     fi
 }
 
+function lcd(){
+    local target=$1
+
+    if [[ $# -eq 0 ]]; then
+        target="."
+    fi
+
+    if [[ $target == "-" ]]; then
+        builtin cd -
+    else
+        builtin cd "$(expand $1)"
+    fi
+
+    local options=("${@[1,-2]}")
+    local arg="${@[-1]}"
+
+    ls .
+}
+
 function mkcd() {
     local lastArg=$@[-1]
     local targetDir=$(expand $lastArg)
@@ -223,102 +242,5 @@ function src() {
     esac
 }
 
-
-# function rm(){
-#     setopt extendedglob
-#     local require_confirm=true
-#     local warn_on_dotfiles=false
-#     local use_regex=false
-#     local safe_regex=false
-#     local targets=()
-#     local regex_patterns=()
-#     local safe_regex_patterns=()
-#     local target_count=0
-#     while [[ $# -ne 0 ]]; do
-#         local arg=$1
-#         case $1 in
-#             -h|--help)
-#                 print "rm [options] <files/directories>"
-#                 print "Delete file or directory"
-#                 print "\t-y --no-confirm             :           Do not ask for confirmation for deleting non-empty directory"
-#                 print "\t-d --warn-on-dotfiles       :           Ask for confirmation for files that begins with dot"
-#                 print "\t-r --regex <patterns>       :           Use regex patterns for searching. If you want to use regex and strict names you should specify strict names first"
-#                 print "\t                                        like this: rm <strict names> [-r|--regex] <regex patterns>"
-#                 print "\t-sr --safe-regex <patterns> :           Everybody can make mistakes, ask foreach file that should be deleted using these regexes. IT DOES NOT WORK ON REGEXES USED IN --regex" 
-#                 print "\t                                        You may choose to give answer once for other deletions"
-#                 print "\t-h --help                   :           Display this message"
-#                 ;;
-#                 return 0
-#             -y|--no-confirm)
-#                 require_confirm=false 
-#                 ;;
-#             -d|--warn-on-dotfiles)
-#                 warn_on_dotfiles=true
-#                 ;;
-#             -r|--regex)
-#                 shift 
-#                 while [[ ! $1 == -* ]]; do
-#                     regex_patterns+=($1)
-#                     shift
-#                 done
-#                 use_regex=true
-#                 ;;
-#             -sr|--safe-regex)
-#                 use_regex=true
-#                 safe_regex=true
-#                 ;;
-#             -*)
-#                 print "\x1b[38;2;255;0;0mUnknown option \'$1\'"
-#                 return 1
-#                 ;;
-#             *)
-#                 targets+=($arg)
-#                 target_count=$((target_count+1))
-#                 ;;
-#         esac
-#         shift
-#     done
-#
-#     for target in $targets; do
-#         if [[ -d $target ]]; then
-#             if [[ -z ${(f)"${target}/*(N)"} ]]; then
-#                 rmdir $target
-#             elif [[ $require_confirm == true ]]; then
-#                 print -n "Directory is not empty. Do you want to proceed? [Y/n][n]: "
-#                 read -k 1 answer
-#                 print
-#                 case $answer in
-#                     [Yy])
-#                         /usr/bin/rm -rf -- "$target"
-#                         ;;
-#                     [Nn]|"")
-#                         print "Directory \'$target\' has not been deleted"
-#                         ;;
-#                 esac
-#             else
-#                 /usr/bin/rm -rf -- "${target}"
-#             fi
-#         elif [[ ! -f $target ]]; then
-#             print "\x1b[38;2;255;0;0mFile \'$target\' doesn't exist"
-#             return 1
-#         elif [[ ${target[1]} == "." && $warn_on_dotfiles == true ]]; then
-#             print -n "File is dotfile. Do you want to proceed? [Y/n][n]: "
-#             read -k 1 answer
-#             print
-#             case $answer in
-#                 [Yy])
-#                     /usr/bin/rm -f -- "$target"
-#                     ;;
-#                 [Nn]|"")
-#                     print "File \'$target\' has not been deleted"
-#                     ;;
-#             esac
-#         else
-#             /usr/bin/rm "${target}"
-#         fi
-#     done
-# }
-
 alias rm="trash"
-
 alias ni="touch"
