@@ -242,5 +242,45 @@ function src() {
     esac
 }
 
-alias rm="trash"
+function rm(){
+    local path=$1
+    path=$(expand $path)
+    trash $path 2> /dev/null
+    local result=$?
+    if [[ $result -ne 0 ]]; then
+        if [[ -f $path ]]; then
+            print "This file cannot be trashed..."
+            read -q "choice?Want to use /usr/bin/rm instead? [y/n]: "
+            if [[ $choice != "y" ]]; then
+                print "Aborting..."
+                return 0
+            else
+                print "Deleting file..."
+                /usr/bin/rm $path
+                if [[ $? -ne 0 ]]; then
+                    print "This also failed... Aborting"
+                    return $?
+                fi
+            fi
+        elif [[ -d $path ]]; then
+            print "This directory cannot be trashed..."
+            read -q "choice?Want to use /usr/bin/rm -rf instead? [y/n]: "
+            if [[ $choice != "y" ]]; then
+                print "Aborting..."
+                return 0
+            else
+                print "Deleting file..."
+                /usr/bin/rm -rf $1
+                if [[ $? -ne 0 ]]; then
+                    print "This also failed... Aborting"
+                    return $?
+                fi
+            fi
+        else
+            print "This item doesn't exist"
+            return -1
+        fi
+    fi
+}
+
 alias ni="touch"
