@@ -244,13 +244,14 @@ function src() {
 
 function rm(){
     local path=$1
-    path=$(expand $path)
-    trash $path 2> /dev/null
+    path="$(/usr/bin/expand $path)"
+    /usr/bin/trash-put $path
     local result=$?
     if [[ $result -ne 0 ]]; then
         if [[ -f $path ]]; then
             print "This file cannot be trashed..."
             read -q "choice?Want to use /usr/bin/rm instead? [y/n]: "
+            print
             if [[ $choice != "y" ]]; then
                 print "Aborting..."
                 return 0
@@ -265,6 +266,7 @@ function rm(){
         elif [[ -d $path ]]; then
             print "This directory cannot be trashed..."
             read -q "choice?Want to use /usr/bin/rm -rf instead? [y/n]: "
+            print
             if [[ $choice != "y" ]]; then
                 print "Aborting..."
                 return 0
