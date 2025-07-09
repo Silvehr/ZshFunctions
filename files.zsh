@@ -57,6 +57,19 @@ function try-get-source(){
     return 0
 }
 
+function extract_bnum(){
+    local input="$1"
+    local number
+
+    if [[ "$input" =~ '!(<->)' ]]; then
+        number="$match[1]"
+        echo $number
+        return 0
+    else
+        return 1
+    fi
+}
+
 function ls() {
     if [[ $# -eq 0 ]]; then
         colorls --sd -L -1 .
@@ -110,6 +123,7 @@ function cd() {
     if [[ $1 == "-" ]]; then
         builtin cd -
     else
+        local num=$(extract_bnum)
         builtin cd "$(expand $1)"
     fi
 }
