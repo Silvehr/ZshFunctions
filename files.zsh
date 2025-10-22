@@ -57,19 +57,6 @@ function try-get-source(){
     return 0
 }
 
-function extract_bnum(){
-    local input="$1"
-    local number
-
-    if [[ "$input" =~ '!(<->)' ]]; then
-        number="$match[1]"
-        echo $number
-        return 0
-    else
-        return 1
-    fi
-}
-
 function ls() {
     if [[ $# -eq 0 ]]; then
         colorls --sd -L -1 .
@@ -84,7 +71,7 @@ function ls() {
             colorls --sd -L -1 "${options[@]}" "${arg}" "."
             ;;
         *)
-            colorls --sd -L -1 "${options[@]}" "$(expand "$arg")"
+            colorls --sd -L -1 "${options[@]}" "$(expand-path "$arg")"
             ;;
     esac
 }
@@ -113,9 +100,9 @@ function lst() {
     fi
 
     if [[ $use_depth = true ]]; then
-        colorls --tree="$depth" ${options[@]} $(expand $arg)
+        colorls --tree="$depth" ${options[@]} $(expand-path $arg)
     else
-        colorls --tree ${options[@]} $(expand $arg)
+        colorls --tree ${options[@]} $(expand-path $arg)
     fi
 }
 
@@ -123,8 +110,7 @@ function cd() {
     if [[ $1 == "-" ]]; then
         builtin cd -
     else
-        local num=$(extract_bnum)
-        builtin cd "$(expand $1)"
+        builtin cd "$(expand-path $1)"
     fi
 }
 
@@ -138,7 +124,7 @@ function lcd(){
     if [[ $target == "-" ]]; then
         builtin cd -
     else
-        builtin cd "$(expand $1)"
+        builtin cd "$(expand-path $1)"
     fi
 
     local options=("${@[1,-2]}")
@@ -148,21 +134,34 @@ function lcd(){
 }
 
 function mkcd() {
-    local lastArg=$@[-1]
-    local targetDir=$(expand $lastArg)
-    local dirMade=false
-
-    if [[ ! -d "$targetDir" ]]; then
-        mkdir -p "$targetDir"
-        if [[ $? -eq 0 ]]; then
-            dirMade=true
+    while [[ $# -gt 1 ]]; do
+        local current_arg=$@[1]
+        local target_dir=$(expand-path "$current_arg")
+        test -d "$target_dir"
+        if [[ $? -eq 1 ]]; then
+            mkdir -p "$target_dir" 2> /dev/null
+            if [[ $? -eq 1 ]]; then
+                print "Failed to create \"${target_dir}\""
+            fi
         fi
-    else
-        dirMade=true
+        shift
+    done
+
+    local current_arg=$@[1]
+    local target_dir=$(expand-path "$current_arg")
+
+    local dir_exist=$(test -d "$target_dir"; echo $?)
+    if [[ $dir_exist -eq 1 ]]; then
+        mkdir -p "$target_dir" 2> /dev/null
+        if [[ $? -eq 1 ]]; then
+            print "Failed to create \"${target_dir}\""
+        else
+            dir_exist=0
+        fi
     fi
 
-    if [[ $dirMade == true ]]; then
-        builtin cd "$targetDir"
+    if [[ $dir_exist -eq 0 ]]; then
+        builtin cd "$target_dir"
     fi
 }
 
@@ -188,29 +187,12 @@ function edit()
             fi
             ;;
         *)
-            $EDITOR $(expand $1)
-            ;;
-    esac
-}
-
-function list() {
-    case $1 in
-        srcs)
-            for dir in ${(@s/:/):-$SOURCE_DIR}; do
-                for file in "$dir"/*; do
-                    print ${(@j:.:)${(@s:.:)${(s:/:)file}[-1]}[1,-2]}
-                done
-            done
-            ;;
-        profile.d)
-            for file in /etc/profile.d/*; do
-                print ${(@j:.:)${(@s:.:)${(s:/:)file}[-1]}[1,-1]}
-            done
-            ;;
-        nvim-plugins)
-            for file in $HOME/.config/nvim/lua/plugins/*; do
-                print ${(@j:.:)${(@s:.:)${(s:/:)file}[-1]}[1,-2]}
-            done
+            local s=$1
+            if [[ ${#s} -eq 0 ]]; then
+                $EDITOR
+            else
+                $EDITOR $(expand-path $1)
+            fi
             ;;
     esac
 }
@@ -257,46 +239,48 @@ function src() {
 }
 
 function rm(){
-    local path=$1
-    path="$(/usr/bin/expand $path)"
-    /usr/bin/trash-put $path
-    local result=$?
-    if [[ $result -ne 0 ]]; then
-        if [[ -f $path ]]; then
-            print "This file cannot be trashed..."
-            read -q "choice?Want to use /usr/bin/rm instead? [y/n]: "
-            print
-            if [[ $choice != "y" ]]; then
-                print "Aborting..."
-                return 0
-            else
-                print "Deleting file..."
-                /usr/bin/rm $path
-                if [[ $? -ne 0 ]]; then
-                    print "This also failed... Aborting"
-                    return $?
+    while [[ $# -gt 0 ]]; do
+        path="$(/usr/bin/expand-path ${@[1]})"
+        /usr/bin/trash-put $path
+        local result=$?
+        if [[ $result -ne 0 ]]; then
+            if [[ -f $path ]]; then
+                print "This file cannot be trashed..."
+                read -q "choice?Want to use /usr/bin/rm instead? [y/n]: "
+                print
+                if [[ $choice != "y" ]]; then
+                    print "Aborting..."
+                    return 0
+                else
+                    print "Deleting file..."
+                    /usr/bin/rm $path
+                    if [[ $? -ne 0 ]]; then
+                        print "This also failed... Aborting"
+                        return $?
+                    fi
                 fi
-            fi
-        elif [[ -d $path ]]; then
-            print "This directory cannot be trashed..."
-            read -q "choice?Want to use /usr/bin/rm -rf instead? [y/n]: "
-            print
-            if [[ $choice != "y" ]]; then
-                print "Aborting..."
-                return 0
-            else
-                print "Deleting file..."
-                /usr/bin/rm -rf $1
-                if [[ $? -ne 0 ]]; then
-                    print "This also failed... Aborting"
-                    return $?
+            elif [[ -d $path ]]; then
+                print "This directory cannot be trashed..."
+                read -q "choice?Want to use /usr/bin/rm -rf instead? [y/n]: "
+                print
+                if [[ $choice != "y" ]]; then
+                    print "Aborting..."
+                    return 0
+                else
+                    print "Deleting file..."
+                    /usr/bin/rm -rf $1
+                    if [[ $? -ne 0 ]]; then
+                        print "This also failed... Aborting"
+                        return $?
+                    fi
                 fi
+            else
+                print "This item doesn't exist"
+                return -1
             fi
-        else
-            print "This item doesn't exist"
-            return -1
         fi
-    fi
+        shift
+    done
 }
 
 alias ni="touch"

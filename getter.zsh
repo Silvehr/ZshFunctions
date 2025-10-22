@@ -45,27 +45,6 @@ function get()
             fi
             ;;
 
-        shell)
-            local action=$1
-            if [[ -z $action ]]; then
-                print $SHELL
-            fi
-            case $action in
-                version|v)
-                    $SHELL --version
-                    ;;
-                name|n)
-                    basename $SHELL
-                    ;;
-                srcs)
-                for dir in ${(@s/:/):-$SOURCE_DIR}; do
-                    for file in "$dir"/*; do
-                        print ${(@j:.:)${(@s:.:)${(s:/:)file}[-1]}[1,-2]}
-                    done
-                done
-                ;;
-            esac
-            ;;
         term)
             echo $TERM
             ;;

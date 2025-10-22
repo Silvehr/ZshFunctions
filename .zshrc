@@ -10,7 +10,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="headline"
+ZSH_THEME="y-kali"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -72,7 +72,7 @@ ZSH_THEME="headline"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting dotnet)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -116,18 +116,26 @@ bindkey -e
 EDITOR=nvim
 
 local function source-all(){
-    for inode in $1/*; do
-        if [[ $inode == '.' || $inode == '..' ]]; then
-            continue
-        fi
-
-        if [[ -d $inode ]]; then
-            source-all $inode
-        else 
-            if [[ $inode == *sh ]]; then
-                source $inode >> /dev/null
+    while [[ $# -ne 0 ]]; do
+        for inode in $1/*; do
+            if [[ $inode == '.' || $inode == '..' ]]; then
+                continue
             fi
-        fi
+
+            if [[ -d $inode ]]; then
+                source-all $inode
+            else 
+                if [[ $inode == *sh ]]; then
+                    source $inode >> /dev/null
+                    result=$(rg --multiline '(?s)on-source.*\{.*\}' $inode ) 
+                    if [[ ${#result} -gt 0 ]]; then 
+                        on-source
+                        unfunction on-source
+                    fi
+                fi
+            fi
+        done
+        shift
     done
 }
 
@@ -155,16 +163,16 @@ alias shutdown='sudo systemctl poweroff'
 alias ssctl='sudo systemctl'
 alias linux="print \"Yes, it's me\""
 alias whoisgay="echo \"Kamil is gay. That's obvious\""
-alias why="echo \"...ain't nothin' but a heartache\""
-alias no="echo \"... ok\""
 alias ptsd="echo \"FreeBSD\""
 alias celar="clear && echo \"You misspelled it\""
+alias clea="clear && echo \"You misspelled it\""
 alias rg="rg --hidden"
+alias lsdsk="dysk"
+alias exi="exit"
 
-PATH="$PATH:/home/maks/.dotnet/tools"
+export DOTNET_ROOT="$HOME/.dotnet"
+export PATH="$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools:$DOTNET_ROOT/sdk"
 
 SOURCE_DIR=~/ShellFunctions
-
-source-all ~/ShellFunctions
+source-all ~/ShellFunctions ~/.config/environment.d
 source /usr/share/nvm/init-nvm.sh
-source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

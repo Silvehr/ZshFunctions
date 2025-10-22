@@ -1,17 +1,18 @@
-ICON_DIR_NAME="."
+IMAGE_EXTENSIONS=(".")
+IMAGE_NAME="EndeavourOS"
 LOGO_TYPE="auto"
 FF_ICON_DIR="/usr/share/icons/FastFetch"
 
-LOGO_HEIGHT=25
+LOGO_HEIGHT=22
 LOGO_WIDTH=50
 
 case $TERM in
     *256color)
-        ICON_DIR_NAME="txt"
+        IMAGE_EXTENSIONS=("txt")
         LOGO_TYPE="file"
         ;;
     *kitty)
-        ICON_DIR_NAME="jpeg"
+        IMAGE_EXTENSIONS=("jpeg" "png")
         LOGO_TYPE="kitty"
         ;;
 esac
@@ -27,6 +28,22 @@ function find-ff-icon(){
 function ff()
 {
     fastfetch --${LOGO_TYPE} "$(find-ff-icon ${ICON_DIR_NAME} ${1})" --logo-height ${LOGO_HEIGHT} --logo-width ${LOGO_WIDTH}
+}
+
+on-source(){
+    local file=""
+    local found=false
+    for extension in $IMAGE_EXTENSIONS; do
+        file="${HOME}/Pictures/FastFetchIcons/${IMAGE_NAME}/${IMAGE_NAME}.${extension}"
+        if [[ -f $file ]]; then
+            found=true
+            break
+        fi
+    done
+    
+    if [[ $found == true ]]; then
+        fastfetch --${LOGO_TYPE} "${file}" --logo-height ${LOGO_HEIGHT} --logo-width ${LOGO_WIDTH}
+    fi
 }
 
 alias ffd="ff C_Sharp"

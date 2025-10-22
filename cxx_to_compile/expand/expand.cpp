@@ -148,7 +148,7 @@ int main(int argc, char **argv)
         // Calculate amount of current path parts
         for (int str_i = 0; str_i < arg_len; ++str_i)
         {
-            if (current_arg[str_i] == '/') ++path_part_count;
+            if (current_arg[str_i] == '/' && str_i + 1 < arg_len) ++path_part_count;
         }
 
         // Check if it is the biggest count
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
         path_parts_buffer_size += cwd_part_count;
         path_parts = new split[path_parts_buffer_size];
 
-        // If there is at least one path that is relative, the first few slots of buffer are filled
+        // If there is at least one path is relative, the first few slots of buffer are filled
         // with splitted cwd. The remaining space is used for both relative and absolute paths
         split_to_split_buffer('/', cwd, cwd_len, path_parts);
     }
@@ -195,7 +195,7 @@ int main(int argc, char **argv)
         // override any of the cwd split
         int limit = absolute ? cwd_part_count : 0;
 
-        // How many path elements were not ignored. If this value is equal to 0, it means that
+        // How many path elements are going to be not ignored. If this value is equal to 0, it means that
         // user navigates to root ("/" or "<Drive>:\")
         int not_ignored_count = path_parts_buffer_size;
 
@@ -213,6 +213,11 @@ int main(int argc, char **argv)
                 not_ignored_count -= 1;
                 part.to_print = false;
             }
+            else if (part.str.length() == 1 && part.str[0] == '.')
+            {
+                not_ignored_count -= 1;
+                part.to_print = false;
+            }
             else if (ignores_left > 0)
             {
                 --ignores_left;
@@ -221,13 +226,13 @@ int main(int argc, char **argv)
             }
         }
 
-        // It makes first path without unnecesary whitespace which would triggers linux
+        // It makes first path without unnecesary whitespace which would trigger linux
         if (first)
             first = false;
         else
             std::cout << ' ';
 
-        if (not_ignored_count == 0) { std::cout << '/'; }
+        if (not_ignored_count <= 0) { std::cout << '/'; }
         else
         {
             for (int index = limit; index < path_parts_buffer_size; index++)
