@@ -1,7 +1,6 @@
 IMAGE_EXTENSIONS=(".")
 IMAGE_NAME="EndeavourOS"
 LOGO_TYPE="auto"
-FF_ICON_DIR="/usr/share/icons/FastFetch"
 
 LOGO_HEIGHT=22
 LOGO_WIDTH=50
@@ -31,19 +30,7 @@ function ff()
 }
 
 on-source(){
-    local file=""
-    local found=false
-    for extension in $IMAGE_EXTENSIONS; do
-        file="${HOME}/Pictures/FastFetchIcons/${IMAGE_NAME}/${IMAGE_NAME}.${extension}"
-        if [[ -f $file ]]; then
-            found=true
-            break
-        fi
-    done
-    
-    if [[ $found == true ]]; then
-        fastfetch --${LOGO_TYPE} "${file}" --logo-height ${LOGO_HEIGHT} --logo-width ${LOGO_WIDTH}
-    fi
+    fastfetch
 }
 
 alias ffd="ff C_Sharp"

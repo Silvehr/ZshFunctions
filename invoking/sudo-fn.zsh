@@ -1,50 +1,3 @@
-function invoke(){
-    local output=1
-    local error=1
-    local exit_code=1
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            -o|--output)
-                case $2 in
-                    "true"|"1") output=1 ;;
-                    "false"|"0") output=0 ;;
-                esac
-                shift
-                ;;
-            "-c"|--exit-code)
-                case $2 in
-                    "true"|"1") exit_code=1 ;;
-                    "false"|"0") exit_code=0 ;;
-                esac
-                shift
-                ;;
-            "-e"|--error)
-                case $2 in
-                    "true"|"1") error=1 ;;
-                    "false"|"0") error=0 ;;
-                esac
-                shift
-                ;;
-            "--")
-                shift
-                local to_append=""
-                if [[ $output -eq 0 ]]; then
-                    to_append="${to_append} > /dev/null"
-                fi
-                if [[ $error -eq 0 ]]; then
-                    to_append="${to_append} 2> /dev/null"
-                fi
-                eval "$@$to_append"
-                if [[ $exit_code -eq 1 ]]; then
-                    echo $?
-                fi
-                return 0
-                ;;
-        esac
-        shift
-    done
-}
-
 function sudo-fn() {
     local usage="Usage: sudo-fn [-b] [-n] [-a] [-p program] function_name [more_functions...] [-- args...]"
     local background=0
@@ -126,4 +79,3 @@ function sudo-fn() {
     "$sudo_program" "${sudo_opts[@]}" "$SHELL" -c "$com"
     return $?
 }
-print "Sourced invoking.zsh"
