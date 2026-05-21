@@ -1,7 +1,10 @@
+<<<<<<< HEAD
 # point to the dotnet installation location
 export DOTNET_ROOT=$HOME/.dotnet
 export PATH="$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools:$DOTNET_ROOT/sdk"
 
+=======
+>>>>>>> ec93398 (docker function)
 # import user-defined binaries
 export PATH="${PATH}:${HOME}/.local/bin"
 
@@ -15,3 +18,7 @@ export PATH="${PATH}:${GEM_HOME}/bin"
 # cargo installs
 export PATH="${PATH}:${HOME}/.cargo/bin"
 
+<<<<<<< HEAD
+=======
+export DOCKER_PHP_IMAGE="php-xdebug-8.5:latest"
+>>>>>>> ec93398 (docker function)
