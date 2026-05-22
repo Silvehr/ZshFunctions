@@ -23,15 +23,6 @@ function find-ff-icon(){
     fi
 }
 
-<<<<<<< HEAD
-for extension in $IMAGE_EXTENSIONS; do
-    file="${HOME}/Pictures/FastFetchIcons/${IMAGE_NAME}/${IMAGE_NAME}.${extension}"
-    if [[ -f $file ]]; then
-        fastfetch --${LOGO_TYPE} "${file}" --logo-height ${LOGO_HEIGHT} --logo-width ${LOGO_WIDTH}
-        break
-    fi
-done
-=======
 if [[ $TERM_PROGRAM != "vscode" ]]; then
     for extension in $IMAGE_EXTENSIONS; do
         file="${HOME}/Pictures/FastFetchIcons/${IMAGE_NAME}/${IMAGE_NAME}.${extension}"
@@ -41,4 +32,3 @@ if [[ $TERM_PROGRAM != "vscode" ]]; then
         fi
     done
 fi
->>>>>>> ec93398 (docker function)
