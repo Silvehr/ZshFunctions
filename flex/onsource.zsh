@@ -23,7 +23,7 @@ function find-ff-icon(){
     fi
 }
 
-if [[ $TERM_PROGRAM != "vscode" ]]; then
+if [[ $TERM_PROGRAM != "vscode" && $TERMINAL_EMULATOR != JetBrains* ]]; then
     for extension in $IMAGE_EXTENSIONS; do
         file="${HOME}/Pictures/FastFetchIcons/${IMAGE_NAME}/${IMAGE_NAME}.${extension}"
         if [[ -f $file ]]; then
