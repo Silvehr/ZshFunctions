@@ -1,4 +1,3 @@
-
 function src() {
     local root="$USER_PROFILE_ROOT"
     local shell="${SHELL:t}"
@@ -15,7 +14,6 @@ function src() {
         local dir="."
         local name="$query"
 
-        # obsługa folder/plik
         if [[ $query == */* ]]; then
             dir="${query%/*}"
             name="${query##*/}"
@@ -37,7 +35,6 @@ function src() {
         return 1
     fi
 
-    # jeżeli wiele plików – fzf
     if (( ${#targets} > 1 )) && command -v fzf >/dev/null; then
         targets=(
             ${(f)"$(print -l $targets | fzf --multi --prompt='source > ')"} 
