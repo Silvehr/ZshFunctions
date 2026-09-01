@@ -12,3 +12,5 @@ export PATH="${PATH}:${GEM_HOME}/bin"
 export PATH="${PATH}:${HOME}/.cargo/bin"
 
 export DOCKER_PHP_IMAGE="php-xdebug-8.5:latest"
+
+export ZELLIJ_AUTO_EXIT="true"

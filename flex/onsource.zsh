@@ -1,5 +1,5 @@
 IMAGE_NAME="EndeavourOS"
-LOGO_TYPE="auto"
+LOGO_TYPE="ascii"
 FF_ICON_DIR="${HOME}/Pictures/FastFetchIcons"
 LOGO_HEIGHT=22
 LOGO_WIDTH=50
